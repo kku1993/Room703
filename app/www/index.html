@@ -43,23 +43,64 @@
 
     <!-- server interface wrapper -->
     <script type="text/javascript" src="js/server-interface.js"></script>
+
+    <!-- handle login -->
     <script type="text/javascript">
+      /* retrieve server address when page is being created */
+      $("#login_page").on("pageinit", function(event){
+        window.localStorage.clear();
+        server.getAddress();
+      });
+
+      function login(email, pw){
+        if(email != "" && pw != ""){
+          data = {user_email: email, user_pw: pw};
+          
+          var success = function(r){
+            var res = server.getJSON(r);
+
+            if(res == null){
+              alert("Login failed");
+            }
+            else{
+              if(res.success)
+                changePage("user_home.html");  
+              else{
+                console.log("server rejected login credentials");
+                alert("Login failed");
+              }
+            }
+          }
+
+          var fail = function(e){
+            console.log(e.message);
+            alert("Login failed");
+          }
+
+          server.request("POST", "/login.php", data, "userLogin", 
+            success, fail);
+        }
+        else{
+          alert("Please enter your email and passowrd");
+        }
+      }
+
       /* initialize the login form */
-      $("#login_form").on("submit", function(){
+      $("#login_form").on("submit", function(e){
+        e.preventDefault();
+
         /* disable submit button */
         $("#login_submit",this).attr("disabled","disabled");
+
         var email = $("#user_email", this).val();
         var pw = $("#user_pw", this).val();
 
-        if(server.login(email, pw)){
-          changePage("user_home.php");
-        }
-        else{
-          alert("Login failed");
-        }
+        login(email, pw);
 
         /* re-enable the button */
         $("#login_submit").removeAttr("disabled");
+
+        return false;
       });
     </script>
 
@@ -67,7 +108,7 @@
     <script type="text/javascript" src="phonegap.js"></script>
     <script type="text/javascript" src="js/index.js"></script>
     <script type="text/javascript">
-        app.initialize();
+      app.initialize();
     </script>
 
   </body>

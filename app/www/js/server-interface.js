@@ -1,5 +1,5 @@
 server = {
-  address: "192.168.1.2/client_interface/",
+  address: "http://www.andrew.cmu.edu/user/kku/room703.json",
 
   /* getJSON: convert reponse into a json object */
   getJSON: function(s){
@@ -11,24 +11,55 @@ server = {
     }
   },
 
-  login: function(email, pw){
-    if(email != "" && pw != ""){
-      $url = server.address + "login.php";
-      $.post(
-        url, 
-        {user_email: email, user_pw: pw}, 
-        function(res){
-          if(res.success){
-            return true;
-          } 
-          else{
-            return false;
-          }
-        },
-        "json");
-    }
+  /* retrieve address of server */
+  getAddress: function(){
+    if(window.localStorage["server_address"] != undefined)
+      return;
 
-    return false;
+    var url = server.address + "?callback=?";
+
+    var success = function(res){
+      if(res == null){
+        console.log("retrieve server address failed");
+        window.localStorage["server_address"] = undefined;
+      }
+      else{
+        addr = "http://" + res.server_address.replace("http://", "") + "/client_interface";
+        console.log("retrieved server address: " + addr);
+        window.localStorage["server_address"] = addr;
+      }
+    };
+
+    $.ajax({
+      type: "GET",
+      url: url,
+      async: false,
+      jsonpCallback: "setServerAddress",
+      contentType: "application/json",
+      dataType: "jsonp",
+      success: success,
+      error: function(e){ console.log(e.message); }
+    });
+  },
+
+  request: function(type, url, data, jsonCallbackName, successCallback, errorCallback){
+    server.getAddress();
+
+    if(window.localStorage["server_address"] == undefined)
+      return;
+
+    if(url.substring(0, 1).localeCompare("/") != 0)
+      url = "/" + url;
+
+    $.ajax({
+      type: type,
+      url: window.localStorage["server_address"] + url,
+      async: false,
+      jsonpCallback: jsonCallbackName,
+      contentType: "application/json",
+      dataType: "jsonp",
+      success: successCallback,
+      error: errorCallback
+    });
   }
-
 };
