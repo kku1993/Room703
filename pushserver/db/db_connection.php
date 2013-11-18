@@ -14,7 +14,7 @@ class DBConnection {
 	}
 	
 	public function connect(){
-		require_once './db_config.php';
+		require_once 'db_config.php';
 		
 		$this->db = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
 		if ($this->db->connect_errno) {
@@ -35,15 +35,14 @@ class DBConnection {
 	}
 	
 	private function hashPassword($password) {
-		//TODO: implement hash
-		return $password;
+		return hash("sha256", $password);
 	}
 	
 	/*
 	 * ENSURES: returns NULL if addUser failed, user_id if successful 
 	 */
 	public function addUser($firstName, $lastName, $pw, $email) {
-		$pw = hashPassword($pw);
+		$pw = $this->hashPassword($pw);
 	
 		$query = "INSERT INTO user(
 			user_first_name, 
@@ -54,7 +53,7 @@ class DBConnection {
 			VALUES(?, ?, ?, ?, NOW());
 		";
 			
-		$stmt = prepareStatement($query);
+		$stmt = $this->prepareStatement($query);
 		$bind = $stmt->bind_param("ssss", $firstName, $lastName, $pw, $email);
 		if(!$bind)
 			return NULL;
@@ -73,7 +72,7 @@ class DBConnection {
 	public function getUID($email){
 		$query = "SELECT user_id FROM user WHERE user_email = ?";
 		
-		$stmt = prepareStatement($query);
+		$stmt = $this->prepareStatement($query);
 		$bind = $stmt->bind_param("s", $email);
 		if(!$bind)
 			return NULL;
@@ -85,7 +84,7 @@ class DBConnection {
 		$stmt->store_result();
 			
 		if($stmt->num_rows == 0)
-			return NULL
+			return NULL;
 			
 		$stmt->bind_result($uid);
 		$stmt->fetch();
@@ -99,7 +98,7 @@ class DBConnection {
 	public function verifyPassword($uid, $pw){
 		$query = "SELECT user_password FROM user WHERE user_id = ?";
 		
-		$stmt = prepareStatement($query);
+		$stmt = $this->prepareStatement($query);
 		$bind = $stmt->bind_param("i", $uid);
 		if(!$bind)
 			return false;
@@ -116,7 +115,7 @@ class DBConnection {
 		$stmt->bind_result($stored_pw);
 		$stmt->fetch();
 		
-		$pw = hashPassword($pw);
+		$pw = $this->hashPassword($pw);
 		
 		return (strcmp($pw, $stored_pw) == 0);
 	}
@@ -143,7 +142,7 @@ class DBConnection {
 			ON DUPLICATE KEY UPDATE gcm_reg_id = ?;
 			";
 		
-		$stmt = prepareStatement($query);
+		$stmt = $this->prepareStatement($query);
 		$bind = $stmt->bind_param("isss", $uid, $gcm_reg_id, $gcm_reg_id_hash, 
       $gcm_reg_id);
 		if(!$bind)
@@ -164,7 +163,7 @@ class DBConnection {
 		$query = 
       "SELECT user_id FROM room_member WHERE room_id = ? AND user_id <> ?";
 
-		$stmt = prepareStatement($query);
+		$stmt = $this->prepareStatement($query);
 		$bind = $stmt->bind_param("ii", $room_id, $uid);
 		if(!$bind)
 			return NULL;
@@ -214,7 +213,7 @@ class DBConnection {
       FROM android_device 
       WHERE user_id = ?";
 
-		$stmt = prepareStatement($query);
+		$stmt = $this->prepareStatement($query);
 		$bind = $stmt->bind_param("i", $uid);
 		if(!$bind)
 			return NULL;
@@ -231,8 +230,8 @@ class DBConnection {
 		$index = 0;
 		foreach($result as $r){	
       $info = array (
-        'gcm_reg_id' = $r['gcm_reg_id'],
-        'device_id' = $r['device_id']
+        'gcm_reg_id' => $r['gcm_reg_id'],
+        'device_id' => $r['device_id']
       );
 
       $android[$index] = new ClientDevice(ANDROID_DEVICE, $uid, $info);

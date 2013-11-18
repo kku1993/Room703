@@ -64,7 +64,7 @@
               if(res.success)
                 changePage("user_home.html");  
               else{
-                console.log(server.error);
+                console.log(res.error);
                 console.log("server rejected login credentials");
                 alert("Login failed");
               }

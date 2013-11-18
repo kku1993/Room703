@@ -128,6 +128,20 @@ include("sql.php");
 			basic_redirect("Unable to create android_device table. Please try again.", "init.php");
 		}
 		
+    //items table
+		$query = "CREATE TABLE IF NOT EXISTS items(
+			item_id INT(11) UNSIGNED NOT NULL AUTO_INCREMENT, 
+      item_name VARCHAR(255) NOT NULL,
+      item_price INT(11) UNSIGNED NOT NULL,
+			user_id INT(11) NOT NULL, 
+      room_id INT(11) NOT NULL,
+			PRIMARY KEY (item_id)
+		)";
+		if(!$db->query($query)){
+			echo $db->error;
+			basic_redirect("Unable to create items table. Please try again.", "init.php");
+		}
+		
 		sql_close($db);
 	}
 	
