@@ -56,9 +56,7 @@
         if(email != "" && pw != ""){
           data = {user_email: email, user_pw: pw};
           
-          var success = function(r){
-            var res = server.getJSON(r);
-
+          var success = function(res){
             if(res == null){
               alert("Login failed");
             }
@@ -66,6 +64,7 @@
               if(res.success)
                 changePage("user_home.html");  
               else{
+                console.log(server.error);
                 console.log("server rejected login credentials");
                 alert("Login failed");
               }
@@ -77,7 +76,7 @@
             alert("Login failed");
           }
 
-          server.request("POST", "/login.php", data, "userLogin", 
+          server.request("/login.php", data, "userLogin", 
             success, fail);
         }
         else{

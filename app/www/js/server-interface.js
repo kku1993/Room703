@@ -42,7 +42,7 @@ server = {
     });
   },
 
-  request: function(type, url, data, jsonCallbackName, successCallback, errorCallback){
+  request: function(url, data, jsonCallbackName, successCallback, errorCallback){
     server.getAddress();
 
     if(window.localStorage["server_address"] == undefined)
@@ -52,8 +52,9 @@ server = {
       url = "/" + url;
 
     $.ajax({
-      type: type,
+      type: "GET",
       url: window.localStorage["server_address"] + url,
+      data: data,
       async: false,
       jsonpCallback: jsonCallbackName,
       contentType: "application/json",
