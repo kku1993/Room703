@@ -200,19 +200,19 @@ class DBConnection {
 	 * ENSURES: returns NULL if addAndroidDevice failed, device_id if successful 
 	 */
 	public function addAndroidDevice($uid, $gcm_reg_id){
-		$gcm_reg_id_hash = hashGCMRegID($gcm_reg_id);
+		$gcm_reg_id_hash = $this->hashGCMRegID($gcm_reg_id);
 		
 		$query = "INSERT INTO android_device(
 			user_id, 
 			gcm_reg_id,
 			gcm_reg_id_hash)
 			VALUES(?, ?, ?)
-			ON DUPLICATE KEY UPDATE gcm_reg_id = ?;
+			ON DUPLICATE KEY UPDATE gcm_reg_id = ?, gcm_reg_id_hash = ?;
 			";
 		
 		$stmt = $this->prepareStatement($query);
-		$bind = $stmt->bind_param("isss", $uid, $gcm_reg_id, $gcm_reg_id_hash, 
-      $gcm_reg_id);
+		$bind = $stmt->bind_param("issss", $uid, $gcm_reg_id, $gcm_reg_id_hash, 
+      $gcm_reg_id, $gcm_reg_id_hash);
 		if(!$bind)
 			return NULL;
 		
