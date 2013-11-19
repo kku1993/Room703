@@ -49,55 +49,6 @@
                 </ul> 
             </div>
         </div>
-
-
-      <script type="text/javascript">
-          /* takes in json file and reads it to update shopping list info*/
-          var getList = function(jfile) { 
-            /*if there is a problem, print error*/
-            var scss = jfile.success;
-            if (!scss) alert(jfile.error);
-
-            var numItems = jfile.num_items; //no. items
-            var item = jfile.items;
-            var parent = document.getElementById('grocerylist');
-
-            if (numItem < 1) return; //no items in list
-            else {
-              //update the components of each item of the shopping list
-              for (var i=1; i<=numItems; i++) {
-                var name = item[i].item_name;
-                var price = item[i].item_price;
-                var status = item[i].item_status;
-                var votes = item[i].item_votes;
-
-                /*Updating shopping list*/
-                var listItem = document.createElement('div');
-                listItem.setAttribute('data-role','collapsible');
-                listItem.setAttribute('data-collapsed','false');
-                listItem.setAttribute("data-content-theme","c");
-
-                var itemName = document.createElement("h3");
-                itemName.innerHTML = name;
-                var ulItem = document.createElement("ul");
-                ulItem.setAttribute("data-inset", "true");
-                /*adding attribtues of item in list*/
-                var itemPrice = document.createElement("li");
-                itemPrice.innerHTML = "Price: $" + price;
-                var itemVote = document.createElement("li");
-                itemVote.innerHTML = votes;
-                
-                ulItem.innerHTML = itemPrice + itemVote;
-                listItem.innerHTML = itemName + ulItem;
-
-                parent.appendChild(listItem);
-
-              }
-              //do stuff to add to list
-            }
-          }
-      </script>
-
       </div>
     </div>
 
@@ -111,5 +62,96 @@
     <script src="js/jquery-2.0.3.min.js"></script>
     <script src="js/jquery.mobile-1.3.2.min.js"></script>
     <script src="js/grocerylist.js"></script>
+
+    <!-- send gcm registration id to server -->
+    <script type="text/javascript">
+      function sendGCMRegID(){
+        var gcm_reg_id = window.localStorage["gcm_reg_id"];
+        var user_id = window.localStorage["user_id"];
+        var user_pw = window.localStorage["user_pw"];
+
+        if(gcm_reg_id != undefined && user_id != undefined 
+          && user_pw != undefined){
+          var data = {gcm_reg_id: gcm_reg_id, user_id: user_id, 
+            user_pw: user_pw};
+
+          var success = function(res){
+            if(res == null){
+              alert("Failed to register GCM Registration ID with server");
+            }
+            else{
+              if(res.success){
+                console.log("registration successful");
+              }
+              else{
+                alert("server error");
+              }
+            }
+          }
+
+          var fail = function(e){
+            console.log(e.message);
+            alert("server error");
+          }
+
+          server.request("/register_android.php", data, "registerAndroid", 
+            success, fail);
+        }
+        else{
+          alert("No GCM registration id");
+        }
+      }
+
+
+      $("#user_home").on("pageinit", sendGCMRegID());
+    </script>
+
+    <!-- js -->
+    <script type="text/javascript">
+      /* takes in json file and reads it to update shopping list info*/
+      var getList = function(jfile) { 
+        /*if there is a problem, print error*/
+        var scss = jfile.success;
+        if (!scss) alert(jfile.error);
+
+        var numItems = jfile.num_items; //no. items
+        var item = jfile.items;
+        var parent = document.getElementById('grocerylist');
+
+        if (numItem < 1) return; //no items in list
+        else {
+          //update the components of each item of the shopping list
+          for (var i=1; i<=numItems; i++) {
+            var name = item[i].item_name;
+            var price = item[i].item_price;
+            var status = item[i].item_status;
+            var votes = item[i].item_votes;
+
+            /*Updating shopping list*/
+            var listItem = document.createElement('div');
+            listItem.setAttribute('data-role','collapsible');
+            listItem.setAttribute('data-collapsed','false');
+            listItem.setAttribute("data-content-theme","c");
+
+            var itemName = document.createElement("h3");
+            itemName.innerHTML = name;
+            var ulItem = document.createElement("ul");
+            ulItem.setAttribute("data-inset", "true");
+            /*adding attribtues of item in list*/
+            var itemPrice = document.createElement("li");
+            itemPrice.innerHTML = "Price: $" + price;
+            var itemVote = document.createElement("li");
+            itemVote.innerHTML = votes;
+
+            ulItem.innerHTML = itemPrice + itemVote;
+            listItem.innerHTML = itemName + ulItem;
+
+            parent.appendChild(listItem);
+
+          }
+          //do stuff to add to list
+        }
+      }
+    </script>
   </body> 
 </html>

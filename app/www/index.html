@@ -57,6 +57,9 @@
         /* force update to the latest server address */
         window.localStorage.clear();
         server.getAddress();
+
+        /* initialize the login form */
+        $("#login_form").on("submit", handleLogin);
       });
 
       function login(email, pw){
@@ -95,8 +98,7 @@
         }
       }
 
-      /* initialize the login form */
-      $("#login_form").on("submit", function(e){
+      function handleLogin(e){
         e.preventDefault();
 
         /* disable submit button */
@@ -111,8 +113,11 @@
         $("#login_submit").removeAttr("disabled");
 
         return false;
-      });
+      }
     </script>
+
+    <!-- GCM -->
+    <script type"text/javascript" src="PushNotification.js"></script>
 
     <!-- phonegap js -->
     <script type="text/javascript" src="phonegap.js"></script>
