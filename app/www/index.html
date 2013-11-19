@@ -46,8 +46,15 @@
 
     <!-- handle login -->
     <script type="text/javascript">
-      /* retrieve server address when page is being created */
+      /* allow cross domain ajax request */
+      $(document).bind("mobileinit", function(){
+        $.support.cors = true;
+        $.mobile.allowCrossDomainPages = true;
+      });
+
+      /* jQuery mobile pageinit event */
       $("#login_page").on("pageinit", function(event){
+        /* force update to the latest server address */
         window.localStorage.clear();
         server.getAddress();
       });
@@ -61,8 +68,12 @@
               alert("Login failed");
             }
             else{
-              if(res.success)
+              if(res.success){
+                window.localStorage["user_id"] = res.user_id;
+                window.localStorage["user_email"] = email;
+                window.localStorage["user_pw"] = pw;
                 changePage("user_home.html");  
+              }
               else{
                 console.log(res.error);
                 console.log("server rejected login credentials");
@@ -80,7 +91,7 @@
             success, fail);
         }
         else{
-          alert("Please enter your email and passowrd");
+          alert("Please enter your email and password");
         }
       }
 

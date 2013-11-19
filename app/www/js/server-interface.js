@@ -16,7 +16,7 @@ server = {
     if(window.localStorage["server_address"] != undefined)
       return;
 
-    var url = server.address + "?callback=?";
+    var url = server.address;
 
     var success = function(res){
       if(res == null){
