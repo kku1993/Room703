@@ -196,6 +196,30 @@ class DBConnection {
 		return hash("sha256", $id);
 	}
 	
+  /* returns the device_id with the gcm_reg_id 
+   * ENSURES: return NULL on failure 
+   */
+  public function getAndroidDeviceID($gcm_reg_id){
+		$query = "SELECT device_id FROM android_device WHERE gcm_reg_id = ?;";
+		
+		$stmt = $this->prepareStatement($query);
+		$bind = $stmt->bind_param("s", $gcm_reg_id);
+		if(!$bind)
+			return NULL;
+		
+		if(!$stmt->execute())
+			return NULL;
+
+    $stmt->store_result();
+    if($stmt->num_rows() == 0)
+      return NULL;
+
+    $stmt->bind_result($device_id);
+    $stmt->fetch();
+
+    return $device_id;
+  }
+
 	/*
 	 * ENSURES: returns NULL if addAndroidDevice failed, device_id if successful 
 	 */
@@ -216,11 +240,15 @@ class DBConnection {
 		if(!$bind)
 			return NULL;
 		
-		$exec = $stmt->execute();
-		if(!$exec)
+		if(!$stmt->execute())
 			return NULL;
 			
-		return $stmt->insert_id;
+    /* workaround to ensure the caller doesn't mistaken duplicate insert for 
+     * error */
+    if($stmt->affected_rows)
+		  return $stmt->insert_id;
+    else
+      return -1;
 	}
 		
 	/*
