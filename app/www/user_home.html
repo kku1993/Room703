@@ -22,40 +22,80 @@
       <div data-role="content">
         <!-- put page content here -->
         <div data-role="content">
-            <div style="float:left;"><h3>
-                Shopping List
-            </h3></div>
+            <div style="float:left;">
+                <h2>Shopping List</h2>
+            </div>
             <div style="float:right;">
-             <a href="add.html" data-role="button">+</a>
+             <a href="#" data-role="button" onclick="changePage('add.html')">+</a>
             </div>            
         </div>
+        <!-- List sample 1 -->
+        <div id="grocerylist">
+            <div data-role="collapsible" data-collapsed="false" data-theme="a" data-content-theme="c">
+                <h3>
+                    Name of grocery
+                </h3>
+                <ul data-inset="true">
+                  <li> Number 1 </li>
+                  <li> Number 2 </li>
+                </ul> 
+                <hr>
 
-        <div data-role="content">
-          <ul id="grocerylist" data-role="listview" data-divider-theme="d" data-inset="true">
-            <li id="groceryItem" data-theme="c">
-              <a href="#" data-transition="slide">
-                  Item
-              </a>
-            </li>
-          </ul>
+            </div>
+            <div data-role="collapsible" data-collapsed="false" data-theme="e" data-content-theme="c">
+                <h3>
+                    Section Header2
+                </h3>
+                <ul data-inset="true">
+                  <li> Number 2 </li>
+                </ul> 
+            </div>
         </div>
+
 
       <script type="text/javascript">
           /* takes in json file and reads it to update shopping list info*/
           var getList = function(jfile) { 
-            var numItems = jfile[0] //no. items
+            /*if there is a problem, print error*/
+            var scss = jfile.success;
+            if (!scss) alert(jfile.error);
+
+            var numItems = jfile.num_items; //no. items
+            var item = jfile.items;
+            var parent = document.getElementById('grocerylist');
+
             if (numItem < 1) return; //no items in list
             else {
               //update the components of each item of the shopping list
               for (var i=1; i<=numItems; i++) {
-                var user = jfile[i].user;
-                var name = jile[i].name;
-                var price = jfile[i].price;
-                var room = jfile[i].room;
-                var item = jfile[i].item;
+                var name = item[i].item_name;
+                var price = item[i].item_price;
+                var status = item[i].item_status;
+                var votes = item[i].item_votes;
+
+                /*Updating shopping list*/
+                var listItem = document.createElement('div');
+                listItem.setAttribute('data-role','collapsible');
+                listItem.setAttribute('data-collapsed','false');
+                listItem.setAttribute("data-content-theme","c");
+
+                var itemName = document.createElement("h3");
+                itemName.innerHTML = name;
+                var ulItem = document.createElement("ul");
+                ulItem.setAttribute("data-inset", "true");
+                /*adding attribtues of item in list*/
+                var itemPrice = document.createElement("li");
+                itemPrice.innerHTML = "Price: $" + price;
+                var itemVote = document.createElement("li");
+                itemVote.innerHTML = votes;
+                
+                ulItem.innerHTML = itemPrice + itemVote;
+                listItem.innerHTML = itemName + ulItem;
+
+                parent.appendChild(listItem);
+
               }
               //do stuff to add to list
-              return;
             }
           }
       </script>
