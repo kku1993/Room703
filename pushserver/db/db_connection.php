@@ -173,16 +173,16 @@ class DBConnection {
       $item_votes, $item_room_id);
 
 		while($stmt->fetch()){
-      $items[$item_id] = array(); 
-      $items[$item_id]["item_id"] = $item_id;
-      $items[$item_id]["item_name"] = $item_name;
+      $item_price = round($item_price, 2);
 
-      /* round price to 2 decimal digits */
-      $items[$item_id]["item_price"] = round($item_price, 2); 
-
-      $items[$item_id]["item_status"] = $item_status;
-      $items[$item_id]["item_votes"] = $item_votes;
-      $items[$item_id]["room_id"] = $item_room_id;
+      $items[] = array(
+        "item_id" => $item_id,
+        "item_name" => $item_name,
+        "item_price" => $item_price,
+        "item_status" => $item_status,
+        "item_votes" => $item_votes,
+        "room_id" => $room_id
+      ); 
     }
 		
 		return $items;

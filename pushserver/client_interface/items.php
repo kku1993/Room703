@@ -24,6 +24,7 @@ if($items == NULL)
 
 $db->close();
 
-replyJSONP($jsonpCallback, 1, "", $items);
+$data = array("num_itmes" => sizeof($items),"items" => $items);
+replyJSONP($jsonpCallback, 1, "", $data);
 
 ?>
