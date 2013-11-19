@@ -132,7 +132,9 @@ include("sql.php");
 		$query = "CREATE TABLE IF NOT EXISTS items(
 			item_id INT(11) UNSIGNED NOT NULL AUTO_INCREMENT, 
       item_name VARCHAR(255) NOT NULL,
-      item_price INT(11) UNSIGNED NOT NULL,
+      item_price FLOAT NOT NULL,
+      item_status INT(11) NOT NULL COMMENT '0 = rejected, 1 = pending, 2 = accepted',
+      item_votes INT(11) NOT NULL,
 			user_id INT(11) NOT NULL, 
       room_id INT(11) NOT NULL,
 			PRIMARY KEY (item_id)

@@ -119,6 +119,74 @@ class DBConnection {
 		
 		return (strcmp($pw, $stored_pw) == 0);
 	}
+
+  /* getRoomID: get the room id of a user id 
+   * ENSURES: returns NULL on fail 
+   */
+  public function getRoomID($uid){
+		$query = "SELECT room_id FROM room_member WHERE user_id = ?";
+		
+		$stmt = $this->prepareStatement($query);
+		$bind = $stmt->bind_param("i", $uid);
+		if(!$bind)
+			return NULL;
+		
+		$exec = $stmt->execute();
+		if(!$exec)
+			return NULL;
+			
+		$stmt->store_result();
+			
+		if($stmt->num_rows == 0)
+			return NULL;
+			
+		$stmt->bind_result($rid);
+		$stmt->fetch();
+		
+		return $rid;
+  }
+
+  /* getRoomItems: get all items of a room 
+   * ENSURES: returns NULL on fail, an array of items otherwise
+   */
+  public function getRoomItems($room_id){
+		$query = "SELECT 
+      item_id, item_name, item_price, item_status, item_votes, room_id 
+      FROM items WHERE room_id = ?";
+		
+		$stmt = $this->prepareStatement($query);
+		$bind = $stmt->bind_param("i", $room_id);
+		if(!$bind)
+			return NULL;
+		
+		$exec = $stmt->execute();
+		if(!$exec)
+			return NULL;
+			
+		$stmt->store_result();
+			
+		if($stmt->num_rows == 0)
+			return NULL;
+			
+    $items = array();
+		$stmt->bind_result($item_id, $item_name, $item_price, $item_status, 
+      $item_votes, $item_room_id);
+
+		while($stmt->fetch()){
+      $items[$item_id] = array(); 
+      $items[$item_id]["item_id"] = $item_id;
+      $items[$item_id]["item_name"] = $item_name;
+
+      /* round price to 2 decimal digits */
+      $items[$item_id]["item_price"] = round($item_price, 2); 
+
+      $items[$item_id]["item_status"] = $item_status;
+      $items[$item_id]["item_votes"] = $item_votes;
+      $items[$item_id]["room_id"] = $item_room_id;
+    }
+		
+		return $items;
+  }
 	
 	/*
 	 * 	hash GCM Registration ID with SHA256 to use as key in checking 

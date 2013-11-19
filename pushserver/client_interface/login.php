@@ -1,14 +1,11 @@
 <?php
 
-function reply_fail($msg){
-  echo "userLogin(";
-  echo json_encode(array("success" => 0, "error" => $msg));
-  echo ");";
-  exit(0);
-}
+require_once("../common/util.php");
+
+$jsonpCallback = "userLogin";
 
 if(!isset($_GET['user_email']) || !isset($_GET['user_pw']))
-  reply_fail("data fields not set");
+  replyJSONP($jsonpCallback, 0, "data fields not set", NULL);
 
 $email = $_GET['user_email'];
 $pw = $_GET['user_pw'];
@@ -17,19 +14,17 @@ require_once("../db/db_connection.php");
 
 $db = new DBConnection();
 if(!$db->connect())
-  reply_fail("failed to connect to database");
+  replyJSONP($jsonpCallback, 0, "failed to connect to database", NULL);
 
 $uid = $db->getUID($email);
 if($uid == NULL)
-  reply_fail("failed to get user id");
+  replyJSONP($jsonpCallback, 0, "failed to get user id", NULL);
 
 if(!$db->verifyPassword($uid, $pw))
-  reply_fail("invalid password");
+  replyJSONP($jsonpCallback, 0, "invalid password", NULL);
 
 $db->close();
 
-echo "userLogin(";
-echo json_encode(array("success" => 1, "user_id" => $uid));
-echo ");";
+replyJSONP($jsonpCallback, 1, "", array("user_id" => $uid));
 
 ?>
