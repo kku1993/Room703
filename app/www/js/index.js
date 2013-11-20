@@ -50,9 +50,11 @@ var app = {
         break;
       case "message":
         /* actual message delivery */
-        alert('message = ' + e.message + ' msgcnt = ' + e.msgcnt);
+        console.log("received gcm message: " + e.message);
+        alert('message = ' + e.message);
         break;
       case "error":
+        console.log("GCM error: " + e.msg);
         alert("GCM error " + e.msg);
         break;
       default:

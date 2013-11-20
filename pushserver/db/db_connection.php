@@ -299,7 +299,7 @@ class DBConnection {
 	 *	ENSURES: returns a list of ClientDevice that belong to the user,
    *    return NULL on failure
 	 */
-	public function getDevices($uid){
+	public function getUserDevices($uid){
     require_once "../common/constants.php";
     require_once "../common/client_device.php";
 
@@ -310,28 +310,24 @@ class DBConnection {
       WHERE user_id = ?";
 
 		$stmt = $this->prepareStatement($query);
-		$bind = $stmt->bind_param("i", $uid);
-		if(!$bind)
+		if(!$stmt->bind_param("i", $uid))
 			return NULL;
 		
-		$exec = $stmt->execute();
-		if(!$exec)
-			return NULL;
+		if(!$stmt->execute())
+      return NULL;
 			
 		$stmt->store_result();
 			
 		$result = $stmt->fetch_all();
 		$android = array();
 		
-		$index = 0;
 		foreach($result as $r){	
       $info = array (
         'gcm_reg_id' => $r['gcm_reg_id'],
         'device_id' => $r['device_id']
       );
 
-      $android[$index] = new ClientDevice(ANDROID_DEVICE, $uid, $info);
-			$index++;
+      $android[] = new ClientDevice(ANDROID_DEVICE, $uid, $info);
 		}
 		
 		return $android;

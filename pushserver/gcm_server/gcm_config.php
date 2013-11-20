@@ -1,4 +1,4 @@
 <?php	
 	//gcm 
-	define("GOOGLE_API_KEY", "AIzaSyCQGT1zCzkz74TYnZpAL-uU8A2UuKrQ3OE");
+	define("GOOGLE_API_KEY", "AIzaSyCUe3QCvIgh-i6w4gQZxVWkiDUOFCBjuto");
 ?>

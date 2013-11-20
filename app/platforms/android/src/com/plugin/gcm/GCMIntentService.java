@@ -70,7 +70,8 @@ public class GCMIntentService extends GCMBaseIntentService {
 			PushPlugin.sendExtras(extras);
 
 			// Send a notification if there is a message
-			if (extras.getString("message").length() != 0) {
+      String msg = extras.getString("message");
+			if (msg != null && msg.length() != 0) {
 				createNotification(context, extras);
 			}
 		}
