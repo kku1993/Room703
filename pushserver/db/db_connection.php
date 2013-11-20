@@ -200,7 +200,7 @@ class DBConnection {
 		";
 			
 		$stmt = $this->prepareStatement($query);
-		$bind = $stmt->bind_param("siii", $item_name, $item_price, $user_id, 
+		$bind = $stmt->bind_param("sdii", $item_name, $item_price, $user_id, 
       $room_id);
 		if(!$bind)
 			return NULL;
