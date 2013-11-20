@@ -187,6 +187,29 @@ class DBConnection {
 		
 		return $items;
   }
+
+  public function addItem($item_name, $item_price, $user_id, $room_id){
+		$query = "INSERT INTO items(
+      item_name,
+      item_price,
+      item_status,
+      item_votes,
+      user_id,
+      room_id)
+			VALUES(?, ?, '1', '1', ?, ?);
+		";
+			
+		$stmt = $this->prepareStatement($query);
+		$bind = $stmt->bind_param("siii", $item_name, $item_price, $user_id, 
+      $room_id);
+		if(!$bind)
+			return NULL;
+		
+		if(!$stmt->execute())
+			return NULL;
+			
+		return $stmt->insert_id;
+  }
 	
 	/*
 	 * 	hash GCM Registration ID with SHA256 to use as key in checking 
