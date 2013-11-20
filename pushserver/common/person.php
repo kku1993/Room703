@@ -6,15 +6,24 @@ class Person {
 	public $devices = NULL; //list of devices this person is using
 	
 	public function __construct($id, $fname, $lname){
-		$this->uid = $id;
+		$this->user_id = $id;
 		$this->first_name = $fname;
 		$this->last_name = $lname;
 	}
 
-  public getAndroidDevices(){
+  public function getAndroidDevices(){
     require_once("constants.php");
-    $f = function($d){ return $d.device_type == ANDROID_DEVICE; };
-    return array_filter($this->devices, $f);
+    $f = function($d){ return $d->device_type == ANDROID_DEVICE; };
+
+    if($this->devices == NULL)
+      return NULL;
+
+    $ret = array_filter($this->devices, $f);
+
+    if(sizeof($ret) == 0)
+      return NULL;
+
+    return $ret;
   }
 
   /*
@@ -22,12 +31,9 @@ class Person {
    *  REQUIRES: set $forceUpdate to true to refresh the user's device list
    *  ENSURES: returns true/false depending on success or not
    */
-  public updateDevices($forceUpdate){
-    if(!$forceUpdate && $this->devices != NULL)
+  public function updateDevices($forceUpdate){
+    if(!$forceUpdate && sizeof($this->devices) != NULL)
       return true; //have devices already, no need to update
-
-    if(!$this->user_id)
-      return false; //no user_id
 
     require_once "../db/db_connection.php";
     $db = new DBConnection();

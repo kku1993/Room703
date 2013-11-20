@@ -279,8 +279,8 @@ class DBConnection {
 	 *		of $uid living the room $room_id
 	 */
 	public function findRoommates($uid, $room_id){
-		$query = 
-      "SELECT user_id FROM room_member WHERE room_id = ? AND user_id <> ?";
+		$query = "SELECT user_id 
+      FROM room_member WHERE room_id = ? AND user_id <> ?";
 
 		$stmt = $this->prepareStatement($query);
 		$bind = $stmt->bind_param("ii", $room_id, $uid);
@@ -296,23 +296,15 @@ class DBConnection {
 		if($stmt->num_rows == 0)
 			return NULL;
 			
-		$result = $stmt->fetch_all();
-		$roommates = array();
-		
     require_once "../common/person.php";
+		
+		$roommates = array();
+    $stmt->bind_result($user_id);
 
-		$index = 0;
-		foreach($result as $r){	
-			if($uid == $r['user_id']){
-				//don't include a person as his own roommate
-				continue;
-			}
-				
-			$mate = new Person();
-			$mate.setUID($r['user_id']);
-			$roommates[$index] = $mate;
-			$index++;
-		}
+		while($stmt->fetch()){
+      $mate = new Person($user_id, "", "");
+      $roommates[] = $mate;
+    }
 		
 		return $roommates;		
 	}
@@ -340,25 +332,27 @@ class DBConnection {
       return NULL;
 			
 		$stmt->store_result();
-			
-		$result = $stmt->fetch_all();
+	
+    $stmt->bind_result($device_id, $gcm_reg_id);
 		$android = array();
 		
-		foreach($result as $r){	
-      $info = array (
-        'gcm_reg_id' => $r['gcm_reg_id'],
-        'device_id' => $r['device_id']
+    while($stmt->fetch()){
+      $info = array(
+        'gcm_reg_id' => $gcm_reg_id,
+        'device_id' => $device_id
       );
 
       $android[] = new ClientDevice(ANDROID_DEVICE, $uid, $info);
-		}
-		
+    }
+
 		return $android;
 	}
 	
 	public function close() {
+    /*
 		if ($this->db != NULL)
 			$this->db->close();
+      */
 	}
 }
 ?>

@@ -87,15 +87,22 @@ class GCMHandler{
 
     foreach($android as $a){
       $getGCMID = function($d){ 
-        return $d->info['gcm_reg_id']; 
+        return $d->device_info['gcm_reg_id'];
       };
 
-      $gcm_reg_id = array_merge($gcm_reg_id,
-        array_map($getGCMID, $a));
+      if($a != NULL){
+        $id = array_map($getGCMID, $a);
+        $gcm_reg_id = array_merge($gcm_reg_id, $id);
+      }
     }
 
+    $info = array(
+      "title" => "New Item!",
+      "message" => $data['item_name']." has been added to your shopping list."
+    );
+
     //send notification
-    return $this->sentNotification($gcm_reg_id, $data);
+    return $this->sendNotification($gcm_reg_id, array_merge($info, $data));
 	}
 }
 ?>

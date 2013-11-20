@@ -2,6 +2,7 @@
 
 require_once("../common/util.php");
 require_once("../db/db_connection.php");
+require_once("../gcm_server/gcm_handler.php");
 
 $jsonpCallback = "itemAdded";
 
@@ -24,9 +25,19 @@ $item_id = $db->addItem($item_name, $item_price, $uid, $rid);
 if($item_id == NULL)
   replyJSONP($jsonpCallback, 0, "failed to add item into database", NULL);
 
-$db->close();
+$data = array(
+  "item_id" => $item_id, 
+  "item_name" => $item_name, 
+  "item_price" => $item_price
+);
 
-$data = array("item_id" => $item_id);
+$roommates = $db->findRoommates($uid, $rid);
+
+/* send notification to all roommates */
+$gcm = new GCMHandler();
+$gcm->sendPurchaseRequest($uid, $roommates, $data);
+
+$db->close();
 replyJSONP($jsonpCallback, 1, "", $data);
 
 ?>
