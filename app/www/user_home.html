@@ -24,7 +24,8 @@
             <h2>Shopping List</h2>
           </div>
           <div style="float:right;">
-            <a href="#" data-role="button" onclick="changePage('add.html')">+</a>
+            <a href="#" data-role="button" data-icon="plus" 
+              onclick="changePage('add.html');">Add Item</a>
           </div>
         </div>
 
@@ -51,32 +52,20 @@
 
     <!-- GCM -->
     <script src="js/gcm.js"></script>
+    <script type"text/javascript" src="PushNotification.js"></script>
 
     <!-- js for manipulating the items list -->
     <script type="text/javascript">
       function buildList(items){
         $('#itemList').empty();
-        
+
         jQuery.each(items, function(key, value){
-          var item_status = "";
-          switch(value["item_status"]){
-            case 0: 
-              item_status = "rejected";
-              break;
-            case 1:
-              item_status = "pending";
-              break;
-            case 2:
-              item_status = "accepted";
-              break;
-            default:
-              item_status = "unknown";
-              break;
-          }
+          var item_status = itemStatusToText(value["item_status"]);
 
           var elem = [
             "<li data-icon='delete'>",
-              "<a href'#' data-item_id='" + value["item_id"] + "'>",
+              "<a href='#' onclick='itemDialog(",
+              value["item_id"] + ");'>",
                 "<h3>" + value["item_name"] + "</h3>",
                 "<div>",
                   "<p> $" + value["item_price"] + "</p>",
@@ -127,6 +116,18 @@
 
         server.request(url, data, jsonpCallback, success, fail);
       }
+
+      /* open the item detail dialog */
+      function itemDialog(item_id){
+        /* store the item id that the user is changing right now */
+        window.localStorage["item_detail_id"] = item_id;
+
+        changePage("item_detail.html", {
+          transition: "slideup", 
+          role: "dialog",
+          reloadPage: true
+        });
+      }
     </script>
 
     <!-- init page -->
@@ -134,12 +135,6 @@
       $("#user_home").on("pageinit", function(event){
         /* send the GCM registration id to the server */
         gcm.sendGCMRegID();
-
-        /* init item list */
-        $('#itemListTemplate a').click(function(){
-          /* bind list click action */
-          console.log($(this).data('item_id'));
-        });
 
         /* get initial list data from server */
         getItems();

@@ -1,0 +1,79 @@
+<!-- Pop Up Dialog display detailed information about an item -->
+<div data-role="dialog" data-close-btn="right" id="item_detail_dialog">
+  <div data-theme="a" data-role="header">
+    <h3 id="item_header">Item 1</h3>
+  </div>
+
+  <div data-role="content">
+    <h2 id="item_detail_name">Item 1</h2>
+    <div class="ui-grid-a">
+      <div class="ui-block-a">
+        <h3>Price</h3>
+      </div>
+      <div class="ui-block-b">
+        <h3 id="item_detail_price">$0.00</h3>
+      </div>
+
+      <div class="ui-block-a">
+        <h3> Status </h3>
+      </div>
+      <div class="ui-block-b">
+        <h3 id="item_detail_status">Pending</h3>
+      </div>
+
+      <div class="ui-block-a">
+        <h3> Votes </h3>
+      </div>
+      <div class="ui-block-b">
+        <h3 id="item_detail_votes"> 3 </h3>
+      </div>
+
+      <div class="ui-block-a">
+        <h3> Added by </h3>
+      </div>
+      <div class="ui-block-b">
+        <h3 id="item_detail_purchaser"> Purchaser </h3>
+      </div>
+    </div>
+
+    <a id="item_save" data-role="button" data-theme="b" href="#" 
+      data-icon="check" data-iconpos="left"> Save </a>
+    <a id="item_cancel" data-role="button" data-theme="a" href="#" 
+      data-icon="delete" data-rel="back" data-iconpos="left"> Cancel </a>
+  </div>
+
+  <!-- fill in page with item info -->
+  <script type="text/javascript">
+    function setItemDetail(result){
+      if(result == null || result.success == 0){
+        alert("failed to get item information");
+      }
+      else{
+        var item = result.item;
+        $("#item_detail_name").html(item["item_name"]);
+        $("#item_detail_price").html("$ " + item["item_price"]);
+        $("#item_detail_status").html(itemStatusToText(item["item_status"]));
+
+        var purchaser = item["purchaser_first_name"] + " " + 
+          item["purchaser_last_name"];
+
+        $("#item_detail_purchaser").html(purchaser);
+      }
+    }
+
+    function setItemDetailFail(e){
+      console.log(e.message);
+      alert("failed to get item detail");
+    }
+
+    $("#item_detail_dialog").on("pageshow", function(){
+      /* get the item_id of the item being manipulated */
+      var item_id = window.localStorage["item_detail_id"];
+
+      server.request("/get_item.php", {item_id: item_id}, "getItem", 
+        setItemDetail, setItemDetailFail);
+
+    });
+  </script>
+
+</div>
