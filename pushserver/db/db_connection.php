@@ -91,6 +91,31 @@ class DBConnection {
 		
 		return $uid;
 	}
+
+  /* returns Person object */
+  public function getUser($uid){
+    require_once("../common/person.php");
+		$query = "SELECT user_first_name, user_last_name FROM user WHERE user_id = ?";
+		
+		$stmt = $this->prepareStatement($query);
+		$bind = $stmt->bind_param("i", $uid);
+		if(!$bind)
+			return NULL;
+		
+		$exec = $stmt->execute();
+		if(!$exec)
+			return NULL;
+			
+		$stmt->store_result();
+			
+		if($stmt->num_rows == 0)
+			return NULL;
+			
+		$stmt->bind_result($fname, $lname);
+		$stmt->fetch();
+		
+		return new Person($uid, $fname, $lname);
+  }
 	
 	/*
 	 *	ENSURES: returns true if the password is correct, false otherwise
@@ -209,6 +234,84 @@ class DBConnection {
 			return NULL;
 			
 		return $stmt->insert_id;
+  }
+
+  /* returns info on 1 item */
+  public function getItem($item_id){
+    $query = "SELECT item_name, item_price, item_status, item_votes, user_id 
+      FROM items WHERE item_id = ?";
+
+		$stmt = $this->prepareStatement($query);
+		$bind = $stmt->bind_param("i", $item_id);
+		if(!$bind)
+			return NULL;
+		
+		if(!$stmt->execute())
+			return NULL;
+
+    $stmt->store_result();
+    if($stmt->num_rows() == 0)
+      return NULL;
+
+    $stmt->bind_result($item_name, $item_price, $item_status, $item_votes, $user_id);
+    $stmt->fetch();
+
+    /* person who added this item */
+    $user = $this->getUser($user_id);
+
+    $ret = array(
+      "item_name" => $item_name,
+      "item_price" => round($item_price, 2),
+      "item_status" => $item_status,
+      "item_votes" => $item_votes,
+      "purchaser_first_name" => $user->first_name,
+      "purchaser_last_name" => $user->last_name
+    );
+
+    return $ret;
+  }
+
+  public function voteItem($item_id, $user_id, $accept_item){
+    require_once("../common/constants.php");
+
+    $item = $this->getItem($item_id);
+
+    if($item == NULL)
+      return NULL;
+
+    if($accept_item < 0)
+      $accept_item = -1;
+    else
+      $accept_item = 1;
+
+    $item_votes = $item["item_votes"] + $accept_item;
+    if($item_votes < 0)
+      $item_votes = 0;
+
+    $item_status = ITEM_ACCEPTED;
+
+    /* TODO: use actual number of people in room as cut off */
+    if($item_votes <= 0)
+      $item_status = ITEM_REJECTED;
+    else if($item_votes <= 2)
+      $item_status = ITEM_PENDING;
+    else
+      $item_status = ITEM_ACCEPTED;
+
+		$query = "UPDATE items SET 
+      item_votes = ?,
+      item_status = ?
+      WHERE item_id = ?;";
+			
+		$stmt = $this->prepareStatement($query);
+		$bind = $stmt->bind_param("iii", $item_votes, $item_status, $item_id);
+		if(!$bind)
+			return NULL;
+		
+		if(!$stmt->execute())
+			return NULL;
+			
+		return array("item_votes" => $item_votes, "item_status" => $item_status);
   }
 	
 	/*
