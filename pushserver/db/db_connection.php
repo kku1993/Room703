@@ -270,6 +270,49 @@ class DBConnection {
 
     return $ret;
   }
+
+  public function voteItem($item_id, $user_id, $accept_item){
+    require_once("../common/constants.php");
+
+    $item = $this->getItem($item_id);
+
+    if($item == NULL)
+      return NULL;
+
+    if($accept_item < 0)
+      $accept_item = -1;
+    else
+      $accept_item = 1;
+
+    $item_votes = $item["item_votes"] + $accept_item;
+    if($item_votes < 0)
+      $item_votes = 0;
+
+    $item_status = ITEM_ACCEPTED;
+
+    /* TODO: use actual number of people in room as cut off */
+    if($item_votes <= 0)
+      $item_status = ITEM_REJECTED;
+    else if($item_votes <= 2)
+      $item_status = ITEM_PENDING;
+    else
+      $item_status = ITEM_ACCEPTED;
+
+		$query = "UPDATE items SET 
+      item_votes = ?,
+      item_status = ?
+      WHERE item_id = ?;";
+			
+		$stmt = $this->prepareStatement($query);
+		$bind = $stmt->bind_param("iii", $item_votes, $item_status, $item_id);
+		if(!$bind)
+			return NULL;
+		
+		if(!$stmt->execute())
+			return NULL;
+			
+		return array("item_votes" => $item_votes, "item_status" => $item_status);
+  }
 	
 	/*
 	 * 	hash GCM Registration ID with SHA256 to use as key in checking 
