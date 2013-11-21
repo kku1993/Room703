@@ -13,6 +13,21 @@
     <title>Room 703</title>
   </head>
   <body>
+    <!-- js loaded for all pages -->
+    <!-- jquery -->
+    <script src="js/jquery-2.0.3.min.js"></script>
+    <script src="js/jquery.mobile-1.3.2.min.js"></script>
+
+    <!-- util functions -->
+    <script type="text/javascript" src="js/util.js"></script>
+
+    <!-- server interface wrapper -->
+    <script type="text/javascript" src="js/server-interface.js"></script>
+
+    <!-- GCM -->
+    <script type="text/javascript" src="js/gcm.js"></script>
+    <script type"text/javascript" src="PushNotification.js"></script>
+
     <div data-role="page" data-theme="b" id="login_page">
       <div data-theme="a" data-role="header">
         <h3>Room 703</h3>
@@ -32,100 +47,85 @@
           <input id="login_submit" type="submit" value="Submit">
         </form>
       </div>
-    </div>
 
-    <!-- jquery -->
-    <script src="js/jquery-2.0.3.min.js"></script>
-    <script src="js/jquery.mobile-1.3.2.min.js"></script>
+      <!-- handle login -->
+      <script type="text/javascript">
+        /* allow cross domain ajax request */
+        $(document).bind("mobileinit", function(){
+          $.support.cors = true;
+          $.mobile.allowCrossDomainPages = true;
+        });
 
-    <!-- util functions -->
-    <script type="text/javascript" src="js/util.js"></script>
+        /* jQuery mobile pageinit event */
+        $("#login_page").on("pageinit", function(event){
+          /* force update to the latest server address */
+          window.localStorage.clear();
+          server.getAddress();
 
-    <!-- server interface wrapper -->
-    <script type="text/javascript" src="js/server-interface.js"></script>
+          /* initialize the login form */
+          $("#login_form").on("submit", handleLogin);
+        });
 
-    <!-- GCM -->
-    <script type="text/javascript" src="js/gcm.js"></script>
-    <script type"text/javascript" src="PushNotification.js"></script>
-
-    <!-- handle login -->
-    <script type="text/javascript">
-      /* allow cross domain ajax request */
-      $(document).bind("mobileinit", function(){
-        $.support.cors = true;
-        $.mobile.allowCrossDomainPages = true;
-      });
-
-      /* jQuery mobile pageinit event */
-      $("#login_page").on("pageinit", function(event){
-        /* force update to the latest server address */
-        window.localStorage.clear();
-        server.getAddress();
-
-        /* initialize the login form */
-        $("#login_form").on("submit", handleLogin);
-      });
-
-      function login(email, pw){
-        if(email != "" && pw != ""){
-          data = {user_email: email, user_pw: pw};
-          
-          var success = function(res){
-            if(res == null){
-              alert("Login failed");
-            }
-            else{
-              if(res.success){
-                window.localStorage["user_id"] = res.user_id;
-                window.localStorage["user_email"] = email;
-                window.localStorage["user_pw"] = pw;
-                changePage("user_home.html");  
-              }
-              else{
-                console.log(res.error);
-                console.log("server rejected login credentials");
+        function login(email, pw){
+          if(email != "" && pw != ""){
+            data = {user_email: email, user_pw: pw};
+            
+            var success = function(res){
+              if(res == null){
                 alert("Login failed");
               }
+              else{
+                if(res.success){
+                  window.localStorage["user_id"] = res.user_id;
+                  window.localStorage["user_email"] = email;
+                  window.localStorage["user_pw"] = pw;
+                  changePage("user_home.html");  
+                }
+                else{
+                  console.log(res.error);
+                  console.log("server rejected login credentials");
+                  alert("Login failed");
+                }
+              }
             }
+
+            var fail = function(e){
+              console.log(e.message);
+              alert("Login failed");
+            }
+
+            server.request("/login.php", data, "userLogin", 
+              success, fail);
           }
-
-          var fail = function(e){
-            console.log(e.message);
-            alert("Login failed");
+          else{
+            alert("Please enter your email and password");
           }
-
-          server.request("/login.php", data, "userLogin", 
-            success, fail);
         }
-        else{
-          alert("Please enter your email and password");
+
+        function handleLogin(e){
+          e.preventDefault();
+
+          /* disable submit button */
+          $("#login_submit",this).attr("disabled","disabled");
+
+          var email = $("#user_email", this).val();
+          var pw = $("#user_pw", this).val();
+
+          login(email, pw);
+
+          /* re-enable the button */
+          $("#login_submit").removeAttr("disabled");
+
+          return false;
         }
-      }
+      </script>
 
-      function handleLogin(e){
-        e.preventDefault();
-
-        /* disable submit button */
-        $("#login_submit",this).attr("disabled","disabled");
-
-        var email = $("#user_email", this).val();
-        var pw = $("#user_pw", this).val();
-
-        login(email, pw);
-
-        /* re-enable the button */
-        $("#login_submit").removeAttr("disabled");
-
-        return false;
-      }
-    </script>
-
-    <!-- phonegap js -->
-    <script type="text/javascript" src="phonegap.js"></script>
-    <script type="text/javascript" src="js/index.js"></script>
-    <script type="text/javascript">
-      app.initialize();
-    </script>
-
+      <!-- phonegap js -->
+      <script type="text/javascript" src="phonegap.js"></script>
+      <script type="text/javascript" src="js/index.js"></script>
+      <script type="text/javascript">
+        app.initialize();
+      </script>
+    </div>
   </body>
 </html>

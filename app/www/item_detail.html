@@ -1,12 +1,12 @@
 <!-- Pop Up Dialog display detailed information about an item -->
 <div data-role="dialog" data-close-btn="right" id="item_detail_dialog">
   <div data-theme="a" data-role="header">
-    <h3 id="item_header">Item 1</h3>
+    <h3 id="item_detail_header">Item 1</h3>
   </div>
 
   <div data-role="content">
     <h2 id="item_detail_name">Item 1</h2>
-    <div class="ui-grid-a">
+    <div class="ui-grid-b">
       <div class="ui-block-a">
         <h3>Price</h3>
       </div>
@@ -25,7 +25,11 @@
         <h3> Votes </h3>
       </div>
       <div class="ui-block-b">
-        <h3 id="item_detail_votes"> 3 </h3>
+        <h3 id="item_detail_votes" data-inline=true> 3 </h3>
+      </div>
+      <div class="ui-block-c">
+        <a id="item_save" data-role="button" data-theme="b" href="#" 
+          data-icon="star" data-iconpos="left" data-inline=true>Vote!</a>
       </div>
 
       <div class="ui-block-a">
@@ -36,10 +40,12 @@
       </div>
     </div>
 
+    <!--
     <a id="item_save" data-role="button" data-theme="b" href="#" 
       data-icon="check" data-iconpos="left"> Save </a>
+      -->
     <a id="item_cancel" data-role="button" data-theme="a" href="#" 
-      data-icon="delete" data-rel="back" data-iconpos="left"> Cancel </a>
+      data-icon="back" data-rel="back" data-iconpos="left"> Back </a>
   </div>
 
   <!-- fill in page with item info -->
@@ -50,6 +56,7 @@
       }
       else{
         var item = result.item;
+        $("#item_detail_header").html(item["item_name"]);
         $("#item_detail_name").html(item["item_name"]);
         $("#item_detail_price").html("$ " + item["item_price"]);
         $("#item_detail_status").html(itemStatusToText(item["item_status"]));
@@ -72,7 +79,6 @@
 
       server.request("/get_item.php", {item_id: item_id}, "getItem", 
         setItemDetail, setItemDetailFail);
-
     });
   </script>
 
