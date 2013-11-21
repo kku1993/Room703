@@ -1,5 +1,68 @@
 <!-- Pop Up Dialog display detailed information about an item -->
 <div data-role="dialog" data-close-btn="right" id="item_detail_dialog">
+  <!-- fill in page with item info -->
+  <script type="text/javascript">
+    function setItemDetail(result){
+      if(result == null || result.success == 0){
+        alert("failed to get item information");
+      }
+      else{
+        var item = result.item;
+        $("#item_detail_header").html(item["item_name"]);
+        $("#item_detail_name").html(item["item_name"]);
+        $("#item_detail_price").html("$ " + item["item_price"]);
+        $("#item_detail_votes").html(item["item_votes"]);
+        $("#item_detail_status").html(itemStatusToText(item["item_status"]));
+
+        var purchaser = item["purchaser_first_name"] + " " + 
+          item["purchaser_last_name"];
+
+        $("#item_detail_purchaser").html(purchaser);
+      }
+    }
+
+    function setItemDetailFail(e){
+      console.log(e.message);
+      alert("failed to get item detail");
+    }
+
+    /* initialize dialog content */
+    $("#item_detail_dialog").on("pageshow", function(){
+      /* get the item_id of the item being manipulated */
+      var item_id = window.localStorage["item_detail_id"];
+
+      server.request("/get_item.php", {item_id: item_id}, "getItem", 
+        setItemDetail, setItemDetailFail);
+    });
+  </script>
+
+  <!-- handlers for votes -->
+  <script>
+    function vote(accept_item){
+      function voteSuccess(result){
+        if(result == null || result.success == 0){
+          alert("voting failed");
+        }
+        else{
+          changePage("user_home.html", null);
+        }
+      }
+
+      function voteFail(e){
+        console.log(e.message);
+        alert("voting failed");
+      }
+
+      var data = {
+        user_id: window.localStorage["user_id"],
+        item_id: window.localStorage["item_detail_id"],
+        accept_item: accept_item
+      };
+
+      server.request("/vote.php", data, "voteItem", voteSuccess, voteFail);
+    }
+  </script>
+
   <div data-theme="a" data-role="header">
     <h3 id="item_detail_header">Item 1</h3>
   </div>
@@ -28,8 +91,12 @@
         <h3 id="item_detail_votes" data-inline=true> 3 </h3>
       </div>
       <div class="ui-block-c">
-        <a id="item_save" data-role="button" data-theme="b" href="#" 
-          data-icon="star" data-iconpos="left" data-inline=true>Vote!</a>
+        <a id="accept_button" data-role="button" data-theme="b" href="#" 
+          data-icon="check" data-iconpos="left" data-inline="true" 
+          data-mini="true" onclick="vote(1);">Yes</a>
+        <a id="reject_button" data-role="button" data-theme="c" href="#" 
+          data-icon="delete" data-iconpos="left" data-inline="true" 
+          data-mini="true" onclick="vote(-1);">No</a>
       </div>
 
       <div class="ui-block-a">
@@ -47,39 +114,4 @@
     <a id="item_cancel" data-role="button" data-theme="a" href="#" 
       data-icon="back" data-rel="back" data-iconpos="left"> Back </a>
   </div>
-
-  <!-- fill in page with item info -->
-  <script type="text/javascript">
-    function setItemDetail(result){
-      if(result == null || result.success == 0){
-        alert("failed to get item information");
-      }
-      else{
-        var item = result.item;
-        $("#item_detail_header").html(item["item_name"]);
-        $("#item_detail_name").html(item["item_name"]);
-        $("#item_detail_price").html("$ " + item["item_price"]);
-        $("#item_detail_status").html(itemStatusToText(item["item_status"]));
-
-        var purchaser = item["purchaser_first_name"] + " " + 
-          item["purchaser_last_name"];
-
-        $("#item_detail_purchaser").html(purchaser);
-      }
-    }
-
-    function setItemDetailFail(e){
-      console.log(e.message);
-      alert("failed to get item detail");
-    }
-
-    $("#item_detail_dialog").on("pageshow", function(){
-      /* get the item_id of the item being manipulated */
-      var item_id = window.localStorage["item_detail_id"];
-
-      server.request("/get_item.php", {item_id: item_id}, "getItem", 
-        setItemDetail, setItemDetailFail);
-    });
-  </script>
-
 </div>
