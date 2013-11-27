@@ -1,5 +1,5 @@
 gcm ={
-  sender_id: "769579813594",
+  sender_id: "",
 
   register: function(){
     /* set up GCM */
